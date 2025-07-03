@@ -81,7 +81,7 @@ function sidebarContent(router: ReturnType<typeof useRouter>) {
     <>
       {/* Search bar */}
       <div className="flex items-center border rounded-md px-2 py-1">
-        <Search className="w-4 h-4 text-gray-500" />
+        <Search className="w-4 h-6 text-gray-500" />
         <input
           type="text"
           placeholder="Search Marketplace"
