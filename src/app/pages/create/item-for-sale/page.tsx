@@ -89,7 +89,7 @@ export default function MarketplaceCreatePage() {
             <button
               type="button"
               onClick={() => setImage(null)}
-              className="absolute top-2 right-3 bg-red-500 text-white cursor-pointer rounded-full p-1 shadow hover:bg-red-600"
+              className="absolute top-15 right-3 bg-red-500 text-white cursor-pointer rounded-full p-1 shadow hover:bg-red-600"
               aria-label="Remove image"
             >
               <X className="w-4 h-4" />
@@ -98,7 +98,7 @@ export default function MarketplaceCreatePage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Title</label>
+          <label className="block text-sm font-medium mb-1">Title </label>
           <Input
           className={`h-15 ${errors.title ? "border-red-500" : ""}`}
             placeholder="What are you selling?"
@@ -187,8 +187,8 @@ export default function MarketplaceCreatePage() {
           <img src={image} alt="Preview" className="max-h-150 rounded shadow" />
         ) : (
           <div className="text-center text-gray-400">
-            <p className="text-lg font-bold">Your listing preview</p>
-            <p className="text-sm">
+            <p className="text-2xl font-bold">Your listing preview</p>
+            <p className="text-md">
               As you create your listing, you can preview how it will appear to others on Marketplace.
             </p>
           </div>
