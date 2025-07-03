@@ -53,7 +53,7 @@ export default function Sidebar() {
         onClick={() => setOpen(false)}
       >
         <div
-          className={`absolute top-0 left-0 h-full w-64 bg-white border-r p-4 space-y-3 transform transition-transform duration-300 ${
+          className={`absolute top-0 left-0 h-full overflow-y-auto w-64 bg-white border-r p-4 space-y-3 transform transition-transform duration-300 ${
             open ? "translate-x-0" : "-translate-x-full"
           }`}
           onClick={(e) => e.stopPropagation()}
@@ -80,7 +80,8 @@ function sidebarContent(router: ReturnType<typeof useRouter>) {
   return (
     <>
       {/* Search bar */}
-      <div className="flex items-center border rounded-md px-2 py-1">
+      <div className="flex items-center border rounded-md px-2 py-1 mt-5 sm:mt-0">
+
         <Search className="w-4 h-6 text-gray-500" />
         <input
           type="text"

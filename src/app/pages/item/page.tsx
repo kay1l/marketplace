@@ -85,13 +85,16 @@ export default function MarketplaceDetailPage() {
 
         <Separator />
 
-        <div className="flex items-center mt-2">
-          <div className="w-8 h-8 rounded-full bg-gray-300 mr-2"></div>
-          <p className="text-sm">Kyle Gomez</p>
-        </div>
+        <div className="flex items-center justify-between">
+            <p className="text-sm font-medium">Seller information</p>
+          </div>
+          <div className="flex items-center mt-2">
+            <div className="w-8 h-8 rounded-full bg-gray-300 mr-2"></div>
+            <p className="text-sm">Kyle Gomez</p>
+          </div>
 
         <div className="border-t pt-2 space-y-2">
-          <p className="text-lg font-medium">Send a message to seller</p>
+          <p className="text-md font-medium">Send a message to seller</p>
 
           <div>
             <label htmlFor="email" className="text-sm font-medium text-gray-700">
