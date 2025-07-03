@@ -1,22 +1,35 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 import { 
   Search, 
-  LayoutGrid, 
-  List, 
-  PlusSquare, 
-  Tv, 
   Car, 
-  Home, 
+  Building2, 
   Shirt, 
-  Gamepad2, 
+  Tag, 
+  Tv, 
+  Clapperboard, 
+  Users, 
+  Gift, 
+  Leaf, 
+  Palette, 
+  Home, 
+  Hammer, 
+  House, 
+  Music, 
+  BookOpen, 
   PawPrint, 
-  Sofa, 
-  Dumbbell 
+  Dumbbell, 
+  Gamepad2, 
+  ShoppingCart, 
+  LayoutGrid,
+  List,
+  PlusSquare
 } from "lucide-react";
 
 export default function Sidebar() {
+  const router = useRouter();
   return (
     <aside className="w-64 p-4 bg-white border-r space-y-3 fixed top-14 left-0 h-screen overflow-y-auto">
       {/* Marketplace heading */}
@@ -34,53 +47,102 @@ export default function Sidebar() {
 
       {/* Links / Categories */}
       <div className="space-y-1 mt-3">
-        <Button variant="ghost" className="w-full justify-start gap-2">
+        <Button variant="ghost" className="w-full justify-start gap-2 cursor-pointer">
           <LayoutGrid className="w-4 h-4" />
           Browse All
         </Button>
-        <Button variant="ghost" className="w-full justify-start gap-2">
+
+        <Button variant="ghost" className="w-full justify-start gap-2 cursor-pointer">
           <List className="w-4 h-4" />
           Your Listings
         </Button>
-        <Button variant="ghost" className="w-full justify-start gap-2">
+
+        <Button variant="ghost"  className="w-full justify-start gap-2 cursor-pointer" 
+        onClick={() => router.push("/pages/create")}>
           <PlusSquare className="w-4 h-4" />
           Create New Listing
         </Button>
 
         <p className="text-sm text-gray-500 font-semibold mt-2">Categories</p>
 
-        <Button variant="ghost" className="w-full justify-start gap-2">
-          <Tv className="w-4 h-4" />
-          Electronics
-        </Button>
-        <Button variant="ghost" className="w-full justify-start gap-2">
+        <div className="space-y-1 mt-3">
+        <Button variant="ghost" className="w-full justify-start gap-2 cursor-pointer">
           <Car className="w-4 h-4" />
           Vehicles
         </Button>
-        <Button variant="ghost" className="w-full justify-start gap-2">
-          <Home className="w-4 h-4" />
-          Home & Garden
+        <Button variant="ghost" className="w-full justify-start gap-2 cursor-pointer">
+          <Building2 className="w-4 h-4" />
+          Property Rentals
         </Button>
-        <Button variant="ghost" className="w-full justify-start gap-2">
+        <Button variant="ghost" className="w-full justify-start gap-2 cursor-pointer">
           <Shirt className="w-4 h-4" />
-          Clothing
+          Apparel
         </Button>
-        <Button variant="ghost" className="w-full justify-start gap-2">
+        <Button variant="ghost" className="w-full justify-start gap-2 cursor-pointer">
+          <Tag className="w-4 h-4" />
+          Classifieds
+        </Button>
+        <Button variant="ghost" className="w-full justify-start gap-2 cursor-pointer">
+          <Tv className="w-4 h-4" />
+          Electronics
+        </Button>
+        <Button variant="ghost" className="w-full justify-start gap-2 cursor-pointer">
+          <Clapperboard className="w-4 h-4" />
+          Entertainment
+        </Button>
+        <Button variant="ghost" className="w-full justify-start gap-2 cursor-pointer">
+          <Users className="w-4 h-4" />
+          Family
+        </Button>
+        <Button variant="ghost" className="w-full justify-start gap-2 cursor-pointer">
+          <Gift className="w-4 h-4" />
+          Free Stuff
+        </Button>
+        <Button variant="ghost" className="w-full justify-start gap-2 cursor-pointer">
+          <Leaf className="w-4 h-4" />
+          Garden & Outdoor
+        </Button>
+        <Button variant="ghost" className="w-full justify-start gap-2 cursor-pointer">
+          <Palette className="w-4 h-4" />
+          Hobbies
+        </Button>
+        <Button variant="ghost" className="w-full justify-start gap-2 cursor-pointer">
+          <Home className="w-4 h-4" />
+          Home Goods
+        </Button>
+        <Button variant="ghost" className="w-full justify-start gap-2 cursor-pointer">
+          <Hammer className="w-4 h-4" />
+          Home Improvement
+        </Button>
+        <Button variant="ghost" className="w-full justify-start gap-2 cursor-pointer">
+          <House className="w-4 h-4" />
+          Home Sales
+        </Button>
+        <Button variant="ghost" className="w-full justify-start gap-2 cursor-pointer">
+          <Music className="w-4 h-4" />
+          Musical Instruments
+        </Button>
+        <Button variant="ghost" className="w-full justify-start gap-2 cursor-pointer">
+          <BookOpen className="w-4 h-4" />
+          School Supplies
+        </Button>
+        <Button variant="ghost" className="w-full justify-start gap-2 cursor-pointer">
+          <PawPrint className="w-4 h-4" />
+          Pet Supplies
+        </Button>
+        <Button variant="ghost" className="w-full justify-start gap-2 cursor-pointer">
+          <Dumbbell className="w-4 h-4" />
+          Sporting Goods
+        </Button>
+        <Button variant="ghost" className="w-full justify-start gap-2 cursor-pointer">
           <Gamepad2 className="w-4 h-4" />
           Toys & Games
         </Button>
-        <Button variant="ghost" className="w-full justify-start gap-2">
-          <PawPrint className="w-4 h-4" />
-          Pets
+        <Button variant="ghost" className="w-full justify-start gap-2 cursor-pointer">
+          <ShoppingCart className="w-4 h-4" />
+          Buy and Sell Groups
         </Button>
-        <Button variant="ghost" className="w-full justify-start gap-2">
-          <Sofa className="w-4 h-4" />
-          Furniture
-        </Button>
-        <Button variant="ghost" className="w-full justify-start gap-2">
-          <Dumbbell className="w-4 h-4" />
-          Sports
-        </Button>
+      </div>
       </div>
     </aside>
   );
