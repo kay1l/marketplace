@@ -4,11 +4,32 @@ import Header from "@/custom_components/layouts/header";
 import Sidebar from "@/custom_components/layouts/sidebar";
 import MarketplaceCard from "@/custom_components/marketplace_card";
 import { MarketplaceCardProps } from "@/types/listing";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { supabase } from "@/lib/supaBaseClient";
 import { useSearchParams } from "next/navigation";
 
 export default function MarketplaceLayout() {
+  return (
+    <div>
+      <Header />
+      <div className="flex">
+        <Sidebar />
+        <main className="p-4 lg:ml-64 w-full">
+          <Suspense fallback={
+            <div className="flex items-center justify-center min-h-screen">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-600 border-solid"></div>
+              <p className="sr-only">Loading...</p>
+            </div>
+          }>
+            <MarketplaceContent />
+          </Suspense>
+        </main>
+      </div>
+    </div>
+  );
+}
+
+function MarketplaceContent() {
   const [listings, setListings] = useState<MarketplaceCardProps[]>([]);
   const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
@@ -47,50 +68,44 @@ export default function MarketplaceLayout() {
     fetchListing();
   }, [searchParams]);
 
-  return (
-    <div>
-      <Header />
-      <div className="flex">
-        <Sidebar />
-        <main className="p-4 lg:ml-64 w-full">
-          {loading ? (
-            <div className="flex items-center justify-center min-h-screen">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-600 border-solid"></div>
-              <p className="sr-only">Loading...</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 mt-15">
-              {listings.length > 0 ? (
-                listings.map((listing) => (
-                  <MarketplaceCard key={listing.id} {...listing} />
-                ))
-              ) : (
-                <p className="col-span-full mt-50 text-center text-gray-500 flex flex-col items-center gap-2">
-                  <svg
-                    className="w-12 h-12 text-gray-300 animate-bounce"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M9 13h6m2 7H7a2 2 0 01-2-2V7a2 2 0 012-2h3l2-2 2 2h3a2 2 0 012 2v11a2 2 0 01-2 2z"
-                    />
-                  </svg>
-                  <span className="text-lg font-medium animate-pulse">
-                    No listings found
-                  </span>
-                  <span className="text-sm text-gray-400">
-                    Try adjusting your search or filters
-                  </span>
-                </p>
-              )}
-            </div>
-          )}
-        </main>
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-600 border-solid"></div>
+        <p className="sr-only">Loading...</p>
       </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 mt-15">
+      {listings.length > 0 ? (
+        listings.map((listing) => (
+          <MarketplaceCard key={listing.id} {...listing} />
+        ))
+      ) : (
+        <p className="col-span-full mt-50 text-center text-gray-500 flex flex-col items-center gap-2">
+          <svg
+            className="w-12 h-12 text-gray-300 animate-bounce"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9 13h6m2 7H7a2 2 0 01-2-2V7a2 2 0 012-2h3l2-2 2 2h3a2 2 0 012 2v11a2 2 0 01-2 2z"
+            />
+          </svg>
+          <span className="text-lg font-medium animate-pulse">
+            No listings found
+          </span>
+          <span className="text-sm text-gray-400">
+            Try adjusting your search or filters
+          </span>
+        </p>
+      )}
     </div>
   );
 }
