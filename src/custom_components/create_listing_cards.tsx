@@ -10,7 +10,7 @@ export default function CreateListingCard() {
       title: "Item for Sale",
       description: "List an item you want to sell.",
       icon: <ShoppingBag className="w-10 h-10 text-[#1877F2]" />,
-      href: "/pages/create/item-for-sale",
+      href: "/create/item-for-sale",
     },
     {
       title: "Create Multiple Listings",

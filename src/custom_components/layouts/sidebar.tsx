@@ -116,7 +116,7 @@ function sidebarContent(
       <div className="space-y-1 mt-3">
         <SidebarButton icon={LayoutGrid} label="Browse All" onClick={() => router.push("/")} isActive={!selectedCategory} />
         <SidebarButton icon={List} label="Your Listings" onClick={() => router.push("/pages/your-listings")} />
-        <SidebarButton icon={PlusSquare} label="Create New Listing" onClick={() => router.push("/pages/create")} />
+        <SidebarButton icon={PlusSquare} label="Create New Listing" onClick={() => router.push("/create")} />
 
         <p className="text-sm text-gray-500 font-semibold mt-2">Categories</p>
 
