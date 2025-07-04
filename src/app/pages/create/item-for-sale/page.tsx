@@ -176,11 +176,24 @@ export default function MarketplaceCreatePage() {
           >
             <option value="">Select category</option>
             <option value="vehicles">Vehicles</option>
-            <option value="property">Property Rentals</option>
+            <option value="property rentals">Property Rentals</option>
             <option value="apparel">Apparel</option>
+            <option value="classifieds">Classifieds</option>
             <option value="electronics">Electronics</option>
-            <option value="toys">Toys & Games</option>
-            <option value="furniture">Furniture</option>
+            <option value="entertainment">Entertainment</option>
+            <option value="family">Family</option>
+            <option value="free stuff">Free Stuff</option>
+            <option value="garden & outdoor">Garden & Outdoor</option>
+            <option value="hobbies">Hobbies</option>
+            <option value="home goods">Home Goods</option>
+            <option value="home improvement">Home Improvement</option>
+            <option value="home sales">Home Sales</option>
+            <option value="musical instruments">Musical Instruments</option>
+            <option value="school supplies">School Supplies</option>
+            <option value="pet supplies">Pet Supplies</option>
+            <option value="sporting goods">Sporting Goods</option>
+            <option value="toys & games">Toys & Games</option>
+            <option value="buy and sell groups">Buy and Sell Groups</option>
           </select>
           {errors.category && (
             <p className="text-xs text-red-500">{errors.category}</p>
@@ -215,7 +228,9 @@ export default function MarketplaceCreatePage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Contact Email</label>
+          <label className="block text-sm font-medium mb-1">
+            Contact Email
+          </label>
           <Input
             className={`h-15 ${errors.email ? "border-red-500" : ""}`}
             type="email"

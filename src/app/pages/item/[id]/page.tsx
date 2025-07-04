@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { X } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { z } from "zod";
+import { supabase } from "@/lib/supaBaseClient";
 
-// Define schema
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email"),
   message: z.string().min(1, "Message is required"),
@@ -15,11 +15,35 @@ const formSchema = z.object({
 
 export default function MarketplaceDetailPage() {
   const router = useRouter();
+  const params = useParams();
+  const { id } = params;
 
-  // Form state
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState<{ email?: string; message?: string }>({});
+
+  const [listing, setListing] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchListing = async () => {
+      const { data, error } = await supabase
+        .from("listings")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching listing:", error.message);
+        router.push("/"); // redirect if not found
+      } else {
+        setListing(data);
+      }
+    };
+
+    if (id) {
+      fetchListing();
+    }
+  }, [id, router]);
 
   const handleSubmit = () => {
     const result = formSchema.safeParse({ email, message });
@@ -34,16 +58,20 @@ export default function MarketplaceDetailPage() {
     } else {
       setErrors({});
       console.log("Submitted data:", result.data);
-      // You can now send result.data to your backend
+      // Handle sending message (e.g. API call)
     }
   };
+
+  if (!listing) {
+    return <p className="p-4">Loading...</p>;
+  }
 
   return (
     <div className="relative grid grid-cols-1 lg:grid-cols-3 min-h-screen">
       {/* Close Button */}
       <button
         onClick={() => router.push("/")}
-        className="absolute top-4 left-4 cursor-pointer  p-1  hover:bg-gray-100"
+        className="absolute top-4 left-4 cursor-pointer p-1 hover:bg-gray-100"
         aria-label="Close"
       >
         <X className="h-10 w-10 text-gray-700" />
@@ -52,8 +80,8 @@ export default function MarketplaceDetailPage() {
       {/* Image Section */}
       <div className="lg:col-span-2 bg-black/5 flex items-center justify-center p-2">
         <Image
-          src="/images/test.png"
-          alt="Listing"
+          src={listing.image_url || "/images/test.png"}
+          alt={listing.title}
           width={800}
           height={600}
           className="rounded-lg max-h-[80vh] object-contain"
@@ -62,36 +90,31 @@ export default function MarketplaceDetailPage() {
 
       {/* Details Section */}
       <div className="bg-white p-4 border-t lg:border-t-0 lg:border-l space-y-4">
-        <h1 className="text-lg font-bold">IPHONE 11 128GB 84%BATT</h1>
-        <p className="text-xl font-semibold text-gray-800">PHP13,000</p>
-        <p className="text-xs text-gray-500">Listed a week ago in Palo, PH-08</p>
+        <h1 className="text-2xl font-bold">{listing.title}</h1>
+        <p className="text-md font-semibold text-gray-800">$ {listing.price}</p>
+        <p className="text-xs text-gray-500">
+          Listed in {listing.location}
+        </p>
 
         <div className="border-t pt-2">
-          <p className="text-lg font-medium">Category</p>
-          <p className="text-sm text-gray-500">House</p>
+          <p className="text-md font-medium">Category</p>
+          <p className="text-sm text-gray-500">{listing.category}</p>
         </div>
 
         <div className="border-t pt-2">
-          <p className="text-lg font-medium">Description</p>
-          <ul className="text-sm text-gray-700 list-disc ml-4 space-y-1">
-            <li>No issue</li>
-            <li>Face ID ✅</li>
-            <li>Truetone ✅</li>
-            <li>Buttons ✅</li>
-            <li>Mahamis</li>
-            <li>Tempered</li>
-          </ul>
+          <p className="text-md font-medium">Seller's Description</p>
+          <p className="text-sm text-gray-700">{listing.description}</p>
         </div>
 
         <Separator />
 
         <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">Seller information</p>
-          </div>
-          <div className="flex items-center mt-2">
-            <div className="w-8 h-8 rounded-full bg-gray-300 mr-2"></div>
-            <p className="text-sm">Kyle Gomez</p>
-          </div>
+          <p className="text-sm font-medium">Seller information</p>
+        </div>
+        <div className="flex items-center mt-2">
+          <div className="w-8 h-8 rounded-full bg-gray-300 mr-2"></div>
+          <p className="text-sm">{listing.seller_email}</p>
+        </div>
 
         <div className="border-t pt-2 space-y-2">
           <p className="text-md font-medium">Send a message to seller</p>

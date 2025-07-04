@@ -17,7 +17,7 @@ export default function MarketplaceCard({
   return (
     <div
       className="border cursor-pointer hover:bg-gray-100 rounded-lg overflow-hidden shadow-sm"
-      onClick={() => router.push("/pages/item")}
+      onClick={() => router.push(`/pages/item/${id}`)}
     >
       <Image
         src={image_url || "/images/test.png"} 
