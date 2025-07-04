@@ -48,9 +48,9 @@ export default function MarketplaceCreatePage() {
       seller_email: email,
       description,
     };
-  
+
     const result = listingSchema.safeParse(localData);
-  
+
     if (!result.success) {
       const fieldErrors: { [key: string]: string } = {};
       result.error.errors.forEach((err) => {
@@ -61,9 +61,9 @@ export default function MarketplaceCreatePage() {
       setErrors(fieldErrors);
       return;
     }
-  
+
     setErrors({});
-  
+
     let imageUrl: string | undefined = undefined;
     if (imageFile) {
       const fileName = `${Date.now()}_${imageFile.name}`;
@@ -72,16 +72,16 @@ export default function MarketplaceCreatePage() {
         .upload(fileName, imageFile, {
           contentType: imageFile.type,
         });
-  
+
       if (uploadError) {
         console.error("Image upload failed:", uploadError);
         toast.error("Image upload failed");
         return;
       }
-  
+
       imageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/listing-images/${fileName}`;
     }
-  
+
     const response = await fetch("/api/listings", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -90,21 +90,20 @@ export default function MarketplaceCreatePage() {
         image_url: imageUrl,
       }),
     });
-  
+
     if (!response.ok) {
       const errorData = await response.json();
       console.error("Failed to create listing:", errorData);
       toast.error(`Failed to create listing: ${errorData.error}`);
       return;
     }
-  
+
     toast.success("Listing created successfully!");
 
     setTimeout(() => {
       router.push("/");
-    }, 2000);
-  }
-  
+    }, 1000);
+  };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 min-h-screen">
@@ -233,9 +232,7 @@ export default function MarketplaceCreatePage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">
-            Contact Email
-          </label>
+          <label className="block text-sm font-medium mb-1">Contact Email</label>
           <Input
             className={`h-15 ${errors.seller_email ? "border-red-500" : ""}`}
             type="email"
@@ -251,7 +248,7 @@ export default function MarketplaceCreatePage() {
         <div>
           <label className="block text-sm font-medium mb-1">Description</label>
           <textarea
-            className={`w-full h-15 border rounded px-2 py-1 text-sm ${
+            className={`w-full border rounded px-2 py-1 text-sm ${
               errors.description ? "border-red-500" : ""
             }`}
             placeholder="Describe your item"
@@ -272,56 +269,60 @@ export default function MarketplaceCreatePage() {
         </Button>
       </aside>
 
-      {/* Center image preview */}
-      <div className="flex items-center justify-center bg-gray-100 border-r p-4">
-        {imagePreview ? (
-          <img
-            src={imagePreview}
-            alt="Preview"
-            className="max-h-150 rounded shadow"
-          />
-        ) : (
-          <div className="text-center text-gray-400">
-            <p className="text-2xl font-bold">Your listing preview</p>
-            <p className="text-md">
-              As you create your listing, you can preview how it will appear to
-              others on Marketplace.
-            </p>
-          </div>
-        )}
+      {/* Preview card */}
+      <div className="col-span-1 md:col-span-2 flex justify-center p-4 mt-10">
+  <div className="relative w-full max-w-3xl border rounded-lg shadow bg-white overflow-hidden h-[600px] flex">
+    
+    {/* Top-left Preview Badge */}
+    <div className="absolute top-2 left-2 bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded shadow">
+      PREVIEW
+    </div>
+
+    {imagePreview ? (
+      <img
+        src={imagePreview}
+        alt="Preview"
+        className="w-2/3 h-full object-cover"
+      />
+    ) : (
+      <div className="w-2/3 h-full bg-gray-200 flex items-center justify-center text-gray-400">
+        <p className="text-sm">Image preview</p>
+      </div>
+    )}
+
+    <div className="p-4 w-1/3 flex flex-col justify-between relative">
+      
+      <div>
+        <p className="text-xl font-bold">{title || "Title"}</p>
+        <p className="text-sm text-gray-600 mb-2">
+          {price ? `$${price}` : "Price"}
+        </p>
+        <p className="text-sm text-gray-600 mb-2">
+          {location ? ` • Listed just now in ${location}` : ""}
+        </p>
+        <p className="text-sm text-gray-500 mb-2">
+          {description || "Description will appear here."}
+        </p>
       </div>
 
-      {/* Right: text preview */}
-      <div className="bg-gray-50 p-4">
-        <h2 className="text-lg font-semibold mb-2">Preview</h2>
-        <div className="border rounded p-3 bg-white">
-          <p className="text-lg font-bold">{title || "Title"}</p>
-          <p className="text-sm text-gray-600">
-            {price ? `$${price}` : "Price"}
-            {location && ` • Listed in ${location}`}
-          </p>
-          <div className="mt-2">
-            <p className="font-medium">Details</p>
-            <p className="text-sm text-gray-500">
-              {description || "Description will appear here."}
-            </p>
-          </div>
-          <hr className="my-2" />
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">Seller information</p>
-            <p className="text-xs text-blue-600 cursor-pointer">
-              Seller details
-            </p>
-          </div>
-          <div className="flex items-center mt-2">
-            <div className="w-8 h-8 rounded-full bg-gray-300 mr-2"></div>
-            <p className="text-sm">Kyle Gomez</p>
-          </div>
-          <Button variant="secondary" disabled className="w-full mt-4">
-            Message
-          </Button>
+      <div>
+        <hr className="my-2" />
+        <p className="text-md font-semibold text-black-500 mb-2">Seller Information</p>
+        <div className="flex items-center mb-2">
+          
+          <div className="w-8 h-8 rounded-full bg-gray-300 mr-2"></div>
+          <p className="text-sm">Kyle Gomez</p>
         </div>
+        <Button variant="secondary" disabled className="w-full">
+          Message
+        </Button>
       </div>
+
+
+    </div>
+  </div>
+</div>
+
     </div>
   );
 }

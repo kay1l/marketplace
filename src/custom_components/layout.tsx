@@ -6,27 +6,46 @@ import MarketplaceCard from "@/custom_components/marketplace_card";
 import { MarketplaceCardProps } from "@/types/listing";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supaBaseClient";
+import { useSearchParams } from "next/navigation";
 
 export default function MarketplaceLayout() {
   const [listings, setListings] = useState<MarketplaceCardProps[]>([]);
   const [loading, setLoading] = useState(true);
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     const fetchListing = async () => {
-      const { data, error } = await supabase
-        .from("listings")
-        .select("*")
-        .order("created_at", { ascending: false });
+      setLoading(true);
+
+      let query = supabase.from("listings").select("*");
+
+      const search = searchParams.get("search");
+      const category = searchParams.get("category");
+
+      if (search) {
+        query = query.ilike("title", `%${search}%`);
+      }
+
+      if (category) {
+        query = query.eq("category", category);
+      }
+
+      query = query.order("created_at", { ascending: false });
+
+      const { data, error } = await query;
 
       if (error) {
         console.error("Error fetching listings:", error.message);
+        setListings([]);
       } else {
         setListings(data as MarketplaceCardProps[]);
       }
+
       setLoading(false);
     };
+
     fetchListing();
-  }, []);
+  }, [searchParams]);
 
   return (
     <div>
@@ -41,9 +60,33 @@ export default function MarketplaceLayout() {
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 mt-15">
-              {listings.map((listing) => (
-                <MarketplaceCard key={listing.id} {...listing} />
-              ))}
+              {listings.length > 0 ? (
+                listings.map((listing) => (
+                  <MarketplaceCard key={listing.id} {...listing} />
+                ))
+              ) : (
+                <p className="col-span-full mt-50 text-center text-gray-500 flex flex-col items-center gap-2">
+                  <svg
+                    className="w-12 h-12 text-gray-300 animate-bounce"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M9 13h6m2 7H7a2 2 0 01-2-2V7a2 2 0 012-2h3l2-2 2 2h3a2 2 0 012 2v11a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  <span className="text-lg font-medium animate-pulse">
+                    No listings found
+                  </span>
+                  <span className="text-sm text-gray-400">
+                    Try adjusting your search or filters
+                  </span>
+                </p>
+              )}
             </div>
           )}
         </main>
