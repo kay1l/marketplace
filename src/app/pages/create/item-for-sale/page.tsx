@@ -7,6 +7,7 @@ import { Upload, X } from "lucide-react";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supaBaseClient";
+import { toast } from "sonner";
 
 export default function MarketplaceCreatePage() {
   const [title, setTitle] = useState("");
@@ -47,9 +48,9 @@ export default function MarketplaceCreatePage() {
       seller_email: email,
       description,
     };
-
+  
     const result = listingSchema.safeParse(localData);
-
+  
     if (!result.success) {
       const fieldErrors: { [key: string]: string } = {};
       result.error.errors.forEach((err) => {
@@ -60,9 +61,9 @@ export default function MarketplaceCreatePage() {
       setErrors(fieldErrors);
       return;
     }
-
+  
     setErrors({});
-
+  
     let imageUrl: string | undefined = undefined;
     if (imageFile) {
       const fileName = `${Date.now()}_${imageFile.name}`;
@@ -71,16 +72,16 @@ export default function MarketplaceCreatePage() {
         .upload(fileName, imageFile, {
           contentType: imageFile.type,
         });
-
+  
       if (uploadError) {
         console.error("Image upload failed:", uploadError);
-        alert("Image upload failed");
+        toast.error("Image upload failed");
         return;
       }
-
+  
       imageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/listing-images/${fileName}`;
     }
-
+  
     const response = await fetch("/api/listings", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -89,17 +90,21 @@ export default function MarketplaceCreatePage() {
         image_url: imageUrl,
       }),
     });
-
+  
     if (!response.ok) {
       const errorData = await response.json();
       console.error("Failed to create listing:", errorData);
-      alert(`Failed to create listing: ${errorData.error}`);
+      toast.error(`Failed to create listing: ${errorData.error}`);
       return;
     }
+  
+    toast.success("Listing created successfully!");
 
-    alert("Listing created successfully!");
-    router.push("/");
-  };
+    setTimeout(() => {
+      router.push("/");
+    }, 2000);
+  }
+  
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 min-h-screen">
@@ -232,7 +237,7 @@ export default function MarketplaceCreatePage() {
             Contact Email
           </label>
           <Input
-            className={`h-15 ${errors.email ? "border-red-500" : ""}`}
+            className={`h-15 ${errors.seller_email ? "border-red-500" : ""}`}
             type="email"
             placeholder="Email"
             value={email}

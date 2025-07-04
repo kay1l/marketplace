@@ -7,9 +7,10 @@ import { X } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { z } from "zod";
 import { supabase } from "@/lib/supaBaseClient";
+import { toast } from "sonner";
 
 const formSchema = z.object({
-  email: z.string().email("Please enter a valid email"),
+  buyer_email: z.string().email("Please enter a valid email"),
   message: z.string().min(1, "Message is required"),
 });
 
@@ -18,9 +19,9 @@ export default function MarketplaceDetailPage() {
   const params = useParams();
   const { id } = params;
 
-  const [email, setEmail] = useState("");
+  const [buyerEmail, setBuyerEmail] = useState("");
   const [message, setMessage] = useState("");
-  const [errors, setErrors] = useState<{ email?: string; message?: string }>({});
+  const [errors, setErrors] = useState<{ buyer_email?: string; message?: string }>({});
 
   const [listing, setListing] = useState<any>(null);
 
@@ -45,30 +46,66 @@ export default function MarketplaceDetailPage() {
     }
   }, [id, router]);
 
-  const handleSubmit = () => {
-    const result = formSchema.safeParse({ email, message });
+  const handleSubmit = async () => {
+    const result = formSchema.safeParse({ buyer_email: buyerEmail, message });
 
     if (!result.success) {
-      const fieldErrors: { email?: string; message?: string } = {};
+      const fieldErrors: { buyer_email?: string; message?: string } = {};
       result.error.errors.forEach((err) => {
-        const field = err.path[0] as "email" | "message";
+        const field = err.path[0] as "buyer_email" | "message";
         fieldErrors[field] = err.message;
       });
       setErrors(fieldErrors);
-    } else {
-      setErrors({});
-      console.log("Submitted data:", result.data);
-      // Handle sending message (e.g. API call)
+      return;
+    }
+
+    setErrors({});
+
+    try {
+      const res = await fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          listing_id: listing.id,
+          seller_email: listing.seller_email,
+          buyer_email: buyerEmail,
+          message,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        toast.error("Failed to send message", {
+          description: errorData.error || "An error occurred.",
+        });
+        return;
+      }
+
+      toast.success("Message sent", {
+        description: "Your message has been delivered to the seller.",
+      });
+
+      setBuyerEmail("");
+      setMessage("");
+    } catch (err) {
+      console.error("Send message error:", err);
+      toast.error("Unexpected error", {
+        description: "Something went wrong. Please try again.",
+      });
     }
   };
 
   if (!listing) {
-    return <p className="p-4">Loading...</p>;
+    return (
+      <div className="flex flex-col min-h-screen items-center justify-center space-y-2">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-600 border-solid"></div>
+        <p className="text-sm text-gray-500">Loading...</p>
+      </div>
+    );
   }
 
   return (
     <div className="relative grid grid-cols-1 lg:grid-cols-3 min-h-screen">
-      {/* Close Button */}
       <button
         onClick={() => router.push("/")}
         className="absolute top-4 left-4 cursor-pointer p-1 hover:bg-gray-100"
@@ -77,7 +114,6 @@ export default function MarketplaceDetailPage() {
         <X className="h-10 w-10 text-gray-700" />
       </button>
 
-      {/* Image Section */}
       <div className="lg:col-span-2 bg-black/5 flex items-center justify-center p-2">
         <Image
           src={listing.image_url || "/images/test.png"}
@@ -88,13 +124,10 @@ export default function MarketplaceDetailPage() {
         />
       </div>
 
-      {/* Details Section */}
       <div className="bg-white p-4 border-t lg:border-t-0 lg:border-l space-y-4">
         <h1 className="text-2xl font-bold">{listing.title}</h1>
         <p className="text-md font-semibold text-gray-800">$ {listing.price}</p>
-        <p className="text-xs text-gray-500">
-          Listed in {listing.location}
-        </p>
+        <p className="text-xs text-gray-500">Listed in {listing.location}</p>
 
         <div className="border-t pt-2">
           <p className="text-md font-medium">Category</p>
@@ -120,21 +153,21 @@ export default function MarketplaceDetailPage() {
           <p className="text-md font-medium">Send a message to seller</p>
 
           <div>
-            <label htmlFor="email" className="text-sm font-medium text-gray-700">
+            <label htmlFor="buyer_email" className="text-sm font-medium text-gray-700">
               Your Email
             </label>
             <input
               type="email"
-              id="email"
+              id="buyer_email"
               className={`border rounded h-15 w-full p-2 text-sm mt-1 ${
-                errors.email ? "border-red-500" : ""
+                errors.buyer_email ? "border-red-500" : ""
               }`}
               placeholder="Your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={buyerEmail}
+              onChange={(e) => setBuyerEmail(e.target.value)}
             />
-            {errors.email && (
-              <p className="text-xs text-red-500 mt-1">{errors.email}</p>
+            {errors.buyer_email && (
+              <p className="text-xs text-red-500 mt-1">{errors.buyer_email}</p>
             )}
           </div>
 
