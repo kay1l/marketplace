@@ -9,6 +9,7 @@ const listingSchema = z.object({
       location: z.string().nonempty("Location is required"),
       seller_email: z.string().email("Enter a valid email"),
       description: z.string().min(5, "Description must be at least 5 characters"),
+      image_url: z.string().url("Invalid image URL").optional().nullable(),
 });
 
 export async function GET(req: NextRequest) {

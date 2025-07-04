@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Upload, X, Facebook } from "lucide-react";
+import { Upload, X } from "lucide-react";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supaBaseClient";
+
 export default function MarketplaceCreatePage() {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
@@ -14,14 +15,17 @@ export default function MarketplaceCreatePage() {
   const [location, setLocation] = useState("");
   const [email, setEmail] = useState("");
   const [description, setDescription] = useState("");
-  const [image, setImage] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const router = useRouter();
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setImage(URL.createObjectURL(file));
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
     }
   };
 
@@ -35,18 +39,17 @@ export default function MarketplaceCreatePage() {
   });
 
   const handleSubmit = async () => {
-    
     const localData = {
       title,
       category,
       price: Number(price),
       location,
-      seller_email: email,  
+      seller_email: email,
       description,
     };
-  
+
     const result = listingSchema.safeParse(localData);
-  
+
     if (!result.success) {
       const fieldErrors: { [key: string]: string } = {};
       result.error.errors.forEach((err) => {
@@ -57,24 +60,24 @@ export default function MarketplaceCreatePage() {
       setErrors(fieldErrors);
       return;
     }
-  
+
     setErrors({});
-  
+
     let imageUrl: string | undefined = undefined;
-    if (image) {
-      const response = await fetch(image);
-      const blob = await response.blob();
-      const fileName = `${Date.now()}.png`;
+    if (imageFile) {
+      const fileName = `${Date.now()}_${imageFile.name}`;
       const { error: uploadError } = await supabase.storage
         .from("listing-images")
-        .upload(fileName, blob, { contentType: blob.type });
-  
+        .upload(fileName, imageFile, {
+          contentType: imageFile.type,
+        });
+
       if (uploadError) {
         console.error("Image upload failed:", uploadError);
         alert("Image upload failed");
         return;
       }
-  
+
       imageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/listing-images/${fileName}`;
     }
 
@@ -86,18 +89,17 @@ export default function MarketplaceCreatePage() {
         image_url: imageUrl,
       }),
     });
-  
+
     if (!response.ok) {
       const errorData = await response.json();
       console.error("Failed to create listing:", errorData);
       alert(`Failed to create listing: ${errorData.error}`);
       return;
     }
-  
+
     alert("Listing created successfully!");
     router.push("/");
   };
-  
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 min-h-screen">
@@ -107,14 +109,14 @@ export default function MarketplaceCreatePage() {
           <X
             onClick={() => router.push("/")}
             className="h-10 w-10 mb-2 cursor-pointer"
-          ></X>
+          />
           <label
             htmlFor="file-upload"
             className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 cursor-pointer hover:border-[#1877F2] transition-colors min-h-[150px] text-center"
           >
-            {image ? (
+            {imagePreview ? (
               <img
-                src={image}
+                src={imagePreview}
                 alt="Uploaded"
                 className="max-h-32 rounded mb-2"
               />
@@ -131,14 +133,17 @@ export default function MarketplaceCreatePage() {
               id="file-upload"
               type="file"
               accept="image/*"
-              className={`hidden ${errors.category ? "border-red-500" : ""}`}
+              className="hidden"
               onChange={handleImageUpload}
             />
           </label>
-          {image && (
+          {imagePreview && (
             <button
               type="button"
-              onClick={() => setImage(null)}
+              onClick={() => {
+                setImageFile(null);
+                setImagePreview(null);
+              }}
               className="absolute top-15 right-3 bg-red-500 text-white cursor-pointer rounded-full p-1 shadow hover:bg-red-600"
               aria-label="Remove image"
             >
@@ -148,7 +153,7 @@ export default function MarketplaceCreatePage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Title </label>
+          <label className="block text-sm font-medium mb-1">Title</label>
           <Input
             className={`h-15 ${errors.title ? "border-red-500" : ""}`}
             placeholder="What are you selling?"
@@ -163,7 +168,7 @@ export default function MarketplaceCreatePage() {
         <div>
           <label className="block text-sm font-medium mb-1">Category</label>
           <select
-            className={`w-full  h-15 border rounded px-2 py-1 text-sm ${
+            className={`w-full h-15 border rounded px-2 py-1 text-sm ${
               errors.category ? "border-red-500" : ""
             }`}
             value={category}
@@ -210,9 +215,7 @@ export default function MarketplaceCreatePage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">
-            Contact Email
-          </label>
+          <label className="block text-sm font-medium mb-1">Contact Email</label>
           <Input
             className={`h-15 ${errors.email ? "border-red-500" : ""}`}
             type="email"
@@ -251,8 +254,12 @@ export default function MarketplaceCreatePage() {
 
       {/* Center image preview */}
       <div className="flex items-center justify-center bg-gray-100 border-r p-4">
-        {image ? (
-          <img src={image} alt="Preview" className="max-h-150 rounded shadow" />
+        {imagePreview ? (
+          <img
+            src={imagePreview}
+            alt="Preview"
+            className="max-h-150 rounded shadow"
+          />
         ) : (
           <div className="text-center text-gray-400">
             <p className="text-2xl font-bold">Your listing preview</p>
