@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Upload, X, Facebook } from "lucide-react";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
-
+import { supabase } from "@/lib/supaBaseClient";
 export default function MarketplaceCreatePage() {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
@@ -30,20 +30,23 @@ export default function MarketplaceCreatePage() {
     category: z.string().nonempty("Category is required"),
     price: z.number().min(1, "Price must be at least 1"),
     location: z.string().nonempty("Location is required"),
-    email: z.string().email("Enter a valid email"),
+    seller_email: z.string().email("Enter a valid email"),
     description: z.string().min(5, "Description must be at least 5 characters"),
   });
 
-  const handleSubmit = () => {
-    const result = listingSchema.safeParse({
+  const handleSubmit = async () => {
+    
+    const localData = {
       title,
       category,
       price: Number(price),
       location,
-      email,
+      seller_email: email,  
       description,
-    });
-
+    };
+  
+    const result = listingSchema.safeParse(localData);
+  
     if (!result.success) {
       const fieldErrors: { [key: string]: string } = {};
       result.error.errors.forEach((err) => {
@@ -52,36 +55,83 @@ export default function MarketplaceCreatePage() {
         }
       });
       setErrors(fieldErrors);
-    } else {
-      setErrors({});
-      console.log("Valid data!", result.data);
+      return;
     }
+  
+    setErrors({});
+  
+    let imageUrl: string | undefined = undefined;
+    if (image) {
+      const response = await fetch(image);
+      const blob = await response.blob();
+      const fileName = `${Date.now()}.png`;
+      const { error: uploadError } = await supabase.storage
+        .from("listing-images")
+        .upload(fileName, blob, { contentType: blob.type });
+  
+      if (uploadError) {
+        console.error("Image upload failed:", uploadError);
+        alert("Image upload failed");
+        return;
+      }
+  
+      imageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/listing-images/${fileName}`;
+    }
+
+    const response = await fetch("/api/listings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...localData,
+        image_url: imageUrl,
+      }),
+    });
+  
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Failed to create listing:", errorData);
+      alert(`Failed to create listing: ${errorData.error}`);
+      return;
+    }
+  
+    alert("Listing created successfully!");
+    router.push("/");
   };
+  
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 min-h-screen">
       {/* Sidebar form */}
       <aside className="p-4 bg-white border-r space-y-3 overflow-y-auto">
         <div className="relative">
-            <X  onClick={() => router.push("/")} className="h-10 w-10 mb-2 cursor-pointer"></X>
+          <X
+            onClick={() => router.push("/")}
+            className="h-10 w-10 mb-2 cursor-pointer"
+          ></X>
           <label
             htmlFor="file-upload"
             className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 cursor-pointer hover:border-[#1877F2] transition-colors min-h-[150px] text-center"
           >
             {image ? (
-              <img src={image} alt="Uploaded" className="max-h-32 rounded mb-2" />
+              <img
+                src={image}
+                alt="Uploaded"
+                className="max-h-32 rounded mb-2"
+              />
             ) : (
               <>
                 <Upload className="w-8 h-8 text-gray-400 mb-2" />
                 <p className="text-sm text-gray-500">Add photos</p>
-                <p className="text-xs text-gray-400">JPEG, PNG, or WebP (max 5MB)</p>
+                <p className="text-xs text-gray-400">
+                  JPEG, PNG, or WebP (max 5MB)
+                </p>
               </>
             )}
             <Input
               id="file-upload"
               type="file"
               accept="image/*"
-              className={  `hidden ${errors.category ? "border-red-500" : "" }`}
+              className={`hidden ${errors.category ? "border-red-500" : ""}`}
               onChange={handleImageUpload}
             />
           </label>
@@ -100,18 +150,22 @@ export default function MarketplaceCreatePage() {
         <div>
           <label className="block text-sm font-medium mb-1">Title </label>
           <Input
-          className={`h-15 ${errors.title ? "border-red-500" : ""}`}
+            className={`h-15 ${errors.title ? "border-red-500" : ""}`}
             placeholder="What are you selling?"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
-          {errors.title && <p className="text-xs text-red-500">{errors.title}</p>}
+          {errors.title && (
+            <p className="text-xs text-red-500">{errors.title}</p>
+          )}
         </div>
 
         <div>
           <label className="block text-sm font-medium mb-1">Category</label>
           <select
-            className={`w-full  h-15 border rounded px-2 py-1 text-sm ${errors.category ? "border-red-500" : "" }` }
+            className={`w-full  h-15 border rounded px-2 py-1 text-sm ${
+              errors.category ? "border-red-500" : ""
+            }`}
             value={category}
             onChange={(e) => setCategory(e.target.value)}
           >
@@ -123,54 +177,68 @@ export default function MarketplaceCreatePage() {
             <option value="toys">Toys & Games</option>
             <option value="furniture">Furniture</option>
           </select>
-          {errors.category && <p className="text-xs text-red-500">{errors.category}</p>}
+          {errors.category && (
+            <p className="text-xs text-red-500">{errors.category}</p>
+          )}
         </div>
 
         <div>
           <label className="block text-sm font-medium mb-1">Price</label>
           <Input
-          className={`h-15 ${errors.price ? "border-red-500" : ""}`}
+            className={`h-15 ${errors.price ? "border-red-500" : ""}`}
             type="number"
             placeholder="Price"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
           />
-          {errors.price && <p className="text-xs text-red-500">{errors.price}</p>}
+          {errors.price && (
+            <p className="text-xs text-red-500">{errors.price}</p>
+          )}
         </div>
 
         <div>
           <label className="block text-sm font-medium mb-1">Location</label>
           <Input
-          className={`h-15 ${errors.location ? "border-red-500" : ""}`}
+            className={`h-15 ${errors.location ? "border-red-500" : ""}`}
             placeholder="Location"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
           />
-          {errors.location && <p className="text-xs text-red-500">{errors.location}</p>}
+          {errors.location && (
+            <p className="text-xs text-red-500">{errors.location}</p>
+          )}
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Contact Email</label>
+          <label className="block text-sm font-medium mb-1">
+            Contact Email
+          </label>
           <Input
-          className={`h-15 ${errors.email ? "border-red-500" : ""}`}
+            className={`h-15 ${errors.email ? "border-red-500" : ""}`}
             type="email"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
+          {errors.email && (
+            <p className="text-xs text-red-500">{errors.email}</p>
+          )}
         </div>
 
         <div>
           <label className="block text-sm font-medium mb-1">Description</label>
           <textarea
-            className={`w-full h-15 border rounded px-2 py-1 text-sm ${errors.description ? "border-red-500" : "" }`}
+            className={`w-full h-15 border rounded px-2 py-1 text-sm ${
+              errors.description ? "border-red-500" : ""
+            }`}
             placeholder="Describe your item"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
           ></textarea>
-          {errors.description && <p className="text-xs text-red-500">{errors.description}</p>}
+          {errors.description && (
+            <p className="text-xs text-red-500">{errors.description}</p>
+          )}
         </div>
 
         <Button
@@ -189,7 +257,8 @@ export default function MarketplaceCreatePage() {
           <div className="text-center text-gray-400">
             <p className="text-2xl font-bold">Your listing preview</p>
             <p className="text-md">
-              As you create your listing, you can preview how it will appear to others on Marketplace.
+              As you create your listing, you can preview how it will appear to
+              others on Marketplace.
             </p>
           </div>
         )}
@@ -213,7 +282,9 @@ export default function MarketplaceCreatePage() {
           <hr className="my-2" />
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium">Seller information</p>
-            <p className="text-xs text-blue-600 cursor-pointer">Seller details</p>
+            <p className="text-xs text-blue-600 cursor-pointer">
+              Seller details
+            </p>
           </div>
           <div className="flex items-center mt-2">
             <div className="w-8 h-8 rounded-full bg-gray-300 mr-2"></div>

@@ -1,8 +1,17 @@
 "use client"
 
+import { MarketplaceCardProps } from "@/types/listing";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-export default function MarketplaceCard() {
+export default function MarketplaceCard({
+  id,
+  title,
+  price,
+  image_url,
+  location = "Unknown",
+  created_at,
+} : MarketplaceCardProps) {
+  
   const router = useRouter();
 
   return (
@@ -16,10 +25,10 @@ export default function MarketplaceCard() {
         
       />
       <div className="p-2">
-      <p className="text-lg font-bold text-black-600">$100</p> 
-        <p className="font-sm">Sample Item</p>
-        <p className="text-xs">Listed 1 hour ago</p>
-        <p className="text-xs">Ormoc City</p>
+      <p className="text-lg font-bold text-black-600">$ {price}</p> 
+        <p className="font-sm">{title}</p>
+        <p className="text-xs">Listed: {new Date(created_at).toLocaleString()}</p>
+        <p className="text-xs">{location}</p>
       </div>
     </div>
   );

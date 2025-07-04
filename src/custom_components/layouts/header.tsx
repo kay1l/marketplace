@@ -10,7 +10,7 @@ export default function Header() {
       {/* LEFT: Logo */}
       <div className="flex items-center gap-2">
         <Facebook className=" w-8 h-8" />
-        <span className="font-bold text-lg hidden sm:inline"></span>
+        <span className="font-bold text-lg hidden sm:inline">Marketplace</span>
       </div>
 
       {/* RIGHT: Icons */}
