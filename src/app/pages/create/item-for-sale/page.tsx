@@ -271,34 +271,38 @@ export default function MarketplaceCreatePage() {
 
       {/* Preview card */}
       <div className="col-span-1 md:col-span-2 flex justify-center p-4 mt-10">
-  <div className="relative w-full max-w-3xl border rounded-lg shadow bg-white overflow-hidden h-[600px] flex">
-    
+  <div className="relative w-full max-w-3xl border rounded-lg shadow bg-white overflow-hidden h-170 grid md:grid-cols-3">
+
     {/* Top-left Preview Badge */}
     <div className="absolute top-2 left-2 bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded shadow">
       PREVIEW
     </div>
 
+    {/* Image Section */}
     {imagePreview ? (
       <img
         src={imagePreview}
         alt="Preview"
-        className="w-2/3 h-full object-cover"
+        className="w-full h-full object-cover md:col-span-2"
       />
     ) : (
-      <div className="w-2/3 h-full bg-gray-200 flex items-center justify-center text-gray-400">
-        <p className="text-sm">Image preview</p>
-      </div>
+      <div className="w-full h-64 bg-gray-200 flex flex-col items-center justify-center h-full text-gray-400 md:col-span-2 p-4 text-center">
+      <p className="text-lg font-semibold text-gray-500">Your listing preview</p>
+      <p className="text-sm text-gray-400">
+        As you create your listing, you can preview how it will appear to others on Marketplace.
+      </p>
+    </div>
     )}
 
-    <div className="p-4 w-1/3 flex flex-col justify-between relative">
-      
+    {/* Right Side Info */}
+    <div className="p-4 flex flex-col justify-between">
       <div>
         <p className="text-xl font-bold">{title || "Title"}</p>
         <p className="text-sm text-gray-600 mb-2">
           {price ? `$${price}` : "Price"}
         </p>
         <p className="text-sm text-gray-600 mb-2">
-          {location ? ` • Listed just now in ${location}` : ""}
+          {location ? `• Listed just now in ${location}` : "• Listed just now"}
         </p>
         <p className="text-sm text-gray-500 mb-2">
           {description || "Description will appear here."}
@@ -309,7 +313,6 @@ export default function MarketplaceCreatePage() {
         <hr className="my-2" />
         <p className="text-md font-semibold text-black-500 mb-2">Seller Information</p>
         <div className="flex items-center mb-2">
-          
           <div className="w-8 h-8 rounded-full bg-gray-300 mr-2"></div>
           <p className="text-sm">Kyle Gomez</p>
         </div>
@@ -317,9 +320,8 @@ export default function MarketplaceCreatePage() {
           Message
         </Button>
       </div>
-
-
     </div>
+    
   </div>
 </div>
 
