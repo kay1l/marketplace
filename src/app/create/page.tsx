@@ -10,7 +10,9 @@ export default function MarketplaceLayout() {
     <div>
       <Header />
       <div className="flex">
-        <Sidebar />
+        <Suspense fallback={<div>Loading sidebar...</div>}>
+          <Sidebar />
+        </Suspense>
         <main className="p-4 w-full sm:ml-64">
           <Suspense fallback={<div>Loading...</div>}>
             <CreateListingCard />
